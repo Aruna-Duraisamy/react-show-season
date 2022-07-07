@@ -1,17 +1,45 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+import React, { useState } from 'react'
+import { createRoot } from 'react-dom/client';
+import Error from './components/Error';
+import Loading from './components/Loading';
+import Season from './components/Season';
 import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+const App = () => {
+    //  A. Use Geolocation API to get User latitude
+    //      - show loading page until user makes a decision
+    //  B. User accepts to share location,
+    //      - pass  to Season component
+    //      - Season Component will display the Season Text with image.
+    //  C. User denies to share location
+    //      - show error page
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+    const [latitude, setLatitude] = useState();
+    const [errorMessage, seterrorMessage] = useState();
+
+    window.navigator.geolocation.getCurrentPosition(
+        (position) => { setLatitude(position.coords.latitude) },
+        (error) => { seterrorMessage(error.message) }
+    );
+  
+  //DecisionMaker: Which component to display?
+  // A. Loading
+  // B. Season display
+  // C. Error
+
+  if (errorMessage && !latitude) {
+    return <Error errorMessage={errorMessage} />
+  }
+
+  if (!errorMessage && latitude) {
+    return <Season latitude={latitude} />
+  }
+
+  return <Loading message="Waiting to know your location..."/>
+   
+}
+
+
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(<App />);
